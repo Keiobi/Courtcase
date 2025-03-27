@@ -6,8 +6,8 @@ git add .
 git commit -m "Initial commit for Courtcase Next.js app"
 
 echo.
-echo Setting up remote origin: git remote add origin https://github.com/Keiobi/Courtcase.git
-git remote add origin git remote add origin https://github.com/Keiobi/Courtcase.git
+echo Setting up remote origin: https://github.com/Keiobi/Courtcase.git
+git remote add origin https://github.com/Keiobi/Courtcase.git
 
 echo.
 echo Creating main branch...

@@ -49,7 +49,7 @@ A comprehensive case management system for defense lawyers, built with Next.js, 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/Keiobi/Prod.git
+   git clone https://github.com/Keiobi/Courtcase.git
    cd courtcase-nextjs
    ```
 
