@@ -1,0 +1,3 @@
+@echo off
+echo Starting Courtcase Next.js development server...
+npm run dev
