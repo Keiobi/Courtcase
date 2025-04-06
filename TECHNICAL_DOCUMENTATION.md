@@ -6,6 +6,22 @@ This document provides technical details about the Courtcase Next.js application
 
 The Courtcase Next.js application follows a modern architecture based on Next.js 13+ with the App Router pattern. The application is structured to provide a clean separation of concerns, maintainable code, and optimal performance.
 
+## Original Android Application Reference
+
+The Courtcase Next.js application is a migration and enhancement of the original CaseFlow Android application. The original Android project serves as a reference for app layout, theme design, and user functionality.
+
+**Reference Location**: `C:\Users\reaum\AndroidStudioProjects\CaseFlow_V001`
+
+When implementing features in the Next.js version, developers should refer to the original Android application for:
+
+1. **UI/UX Design**: Understanding the original layout and user experience
+2. **Theme Design**: Color schemes, typography, and visual elements
+3. **User Functionality**: Core features and workflows
+4. **Data Models**: Original data structures and relationships
+5. **Business Logic**: Implementation of legal case management processes
+
+This reference is particularly valuable when implementing the case workflow phases, expandable text fields, and other specialized components that were originally designed for the Android platform.
+
 ### Key Architectural Components
 
 1. **Next.js App Router**: Provides file-based routing and layout nesting
@@ -1349,6 +1365,56 @@ export default InitialConsultation;
 - Implement proper password policies
 - Use secure session management
 - Implement rate limiting for login attempts
+
+### Content Security Policy (CSP) Configuration
+
+The application implements a comprehensive Content Security Policy to enhance security by controlling which resources can be loaded and executed. The CSP is configured in the middleware to ensure consistent application across all pages.
+
+#### CSP Implementation
+
+The CSP is primarily configured in `middleware.ts`:
+
+```typescript
+// src/middleware.ts
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next();
+  
+  // Add security headers
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseio.com https://*.firebase.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleapis.com; font-src 'self'; connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://*.firebase.com;"
+  );
+  
+  // Other security headers
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
+  
+  return response;
+}
+```
+
+#### CSP Directives Explained
+
+- `default-src 'self'`: Restricts all resource types to same-origin by default
+- `script-src`: Controls which scripts can be executed
+  - `'self'`: Same-origin scripts
+  - `'unsafe-inline'`: Required for inline scripts (needed for Firebase)
+  - `'unsafe-eval'`: Required for Firebase SDK which uses eval()
+  - External domains: Google APIs and Firebase domains
+- `style-src 'self' 'unsafe-inline'`: Allows same-origin styles and inline styles
+- `img-src 'self' data: https://*.googleapis.com`: Allows images from same-origin, data URIs, and Google APIs
+- `font-src 'self'`: Restricts fonts to same-origin
+- `connect-src`: Controls which network connections are allowed
+  - Includes WebSocket connections to Firebase and HTTPS connections to Google APIs
+
+#### Best Practices for CSP Maintenance
+
+1. **Consolidate CSP Configuration**: Maintain CSP in a single location (middleware.ts) to avoid conflicts
+2. **Regularly Review and Update**: Update the CSP as new resources or features are added
+3. **Minimize Unsafe Directives**: Limit use of 'unsafe-inline' and 'unsafe-eval' when possible
+4. **Test After Changes**: Verify application functionality after any CSP modifications
+5. **Monitor CSP Violations**: Implement reporting to track violations in production
 
 ### Data Security
 

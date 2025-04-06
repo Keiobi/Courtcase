@@ -161,11 +161,13 @@ This document outlines the development plan for the Courtcase Next.js applicatio
    - Login page
    - Registration page
    - Firebase authentication integration
+   - Content Security Policy configuration for Firebase authentication
 
 2. **Layout & Navigation**
    - Header component
    - Theme configuration
    - Basic layout structure
+   - Viewport meta tag for proper mobile rendering
 
 3. **Firebase Integration**
    - Authentication setup
@@ -306,3 +308,4 @@ courtcase-nextjs/
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Original Courtcase Project](C:\Users\reaum\COURTCASE)
+- [CaseFlow Android Project](C:\Users\reaum\AndroidStudioProjects\CaseFlow_V001) - Reference for app layout, theme design, and user functionality
