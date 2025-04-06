@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   AppBar, 
   Toolbar, 
   Typography, 
   Button, 
   IconButton, 
-  Box 
+  Box,
+  CircularProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-import { getCurrentUser, signOutUser } from '@/services/firebase';
+import { useRouter } from 'next/navigation';
+import { signOutUser } from '@/services/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   toggleSidebar?: () => void;
@@ -24,32 +25,8 @@ interface HeaderProps {
  */
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  
-  useEffect(() => {
-    // Check if user is authenticated
-    const checkAuth = () => {
-      try {
-        const currentUser = getCurrentUser();
-        
-        if (currentUser) {
-          setIsAuthenticated(true);
-          setUser(currentUser);
-        } else {
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-        setIsAuthenticated(false);
-        setUser(null);
-      }
-    };
-    
-    checkAuth();
-  }, [pathname]);
+  const { currentUser, isLoading, authInitialized } = useAuth();
+  const isAuthenticated = !!currentUser;
   
   const handleLogout = async () => {
     try {
@@ -60,9 +37,6 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         localStorage.removeItem('uid');
       }
       
-      // Update state
-      setIsAuthenticated(false);
-      setUser(null);
       
       // Redirect to login page
       router.push('/login');
@@ -98,10 +72,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           Courtcase
         </Typography>
         
-        {isAuthenticated ? (
+        {!authInitialized || isLoading ? (
+          <CircularProgress color="inherit" size={24} />
+        ) : isAuthenticated ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
-              {user?.email || 'User'}
+              {currentUser?.email || 'User'}
             </Typography>
             <Button 
               color="inherit" 

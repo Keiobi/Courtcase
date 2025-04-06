@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Paper, 
@@ -9,11 +9,13 @@ import {
   Button, 
   Box, 
   Alert,
-  Link
+  Link,
+  CircularProgress
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import { signInWithEmail } from '@/services/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Login page component
@@ -21,12 +23,21 @@ import { signInWithEmail } from '@/services/firebase';
  */
 export default function Login() {
   const router = useRouter();
+  const { currentUser, isLoading, authInitialized } = useAuth();
   
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authInitialized && currentUser && !isLoading) {
+      console.log('User already logged in and auth initialized, redirecting to dashboard');
+      router.push('/dashboard');
+    }
+  }, [currentUser, isLoading, authInitialized, router]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,16 +49,11 @@ export default function Login() {
     }
     
     try {
-      setLoading(true);
+      setFormLoading(true);
       setError('');
       
       // Call Firebase authentication
       const userCredential = await signInWithEmail(email, password);
-      
-      // Store user info in local storage (if needed)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('uid', userCredential.user.uid);
-      }
       
       // Navigate to dashboard
       router.push('/dashboard');
@@ -55,9 +61,20 @@ export default function Login() {
       console.error('Login error:', error);
       setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
+  
+  // Show loading indicator while checking auth state
+  if (isLoading) {
+    return (
+      <Container maxWidth="sm">
+        <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
   
   return (
     <Container maxWidth="sm">
@@ -102,9 +119,9 @@ export default function Login() {
               fullWidth
               size="large"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+              disabled={formLoading}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {formLoading ? 'Logging in...' : 'Login'}
             </Button>
             
             <Box sx={{ textAlign: 'center', mt: 2 }}>

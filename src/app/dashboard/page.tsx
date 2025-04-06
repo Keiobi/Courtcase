@@ -1,19 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { 
   Container, 
   Typography, 
   Box, 
   Paper, 
-  Grid, 
   Card, 
   CardContent,
   CardHeader,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser, signOutUser } from '@/services/firebase';
+import { signOutUser } from '@/services/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Dashboard page component
@@ -21,41 +22,19 @@ import { getCurrentUser, signOutUser } from '@/services/firebase';
  */
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { currentUser, isLoading, authInitialized } = useAuth();
   
   useEffect(() => {
-    // Check if user is authenticated
-    const checkAuth = async () => {
-      try {
-        const currentUser = getCurrentUser();
-        
-        if (!currentUser) {
-          // Redirect to login if not authenticated
-          router.push('/login');
-          return;
-        }
-        
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-        router.push('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkAuth();
-  }, [router]);
+    // Only redirect if auth is initialized and user is not authenticated
+    if (authInitialized && !isLoading && !currentUser) {
+      console.log('User not authenticated and auth initialized, redirecting to login');
+      router.push('/login');
+    }
+  }, [currentUser, isLoading, authInitialized, router]);
   
   const handleLogout = async () => {
     try {
       await signOutUser();
-      
-      // Clear local storage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('uid');
-      }
       
       // Redirect to login
       router.push('/login');
@@ -64,7 +43,7 @@ export default function Dashboard() {
     }
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <Container>
         <Box sx={{ mt: 4, textAlign: 'center' }}>
@@ -93,7 +72,7 @@ export default function Dashboard() {
         <Box sx={{ mb: 4 }}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h5" gutterBottom>
-              Welcome, {user?.email || 'User'}
+            Welcome, {currentUser?.email || 'User'}
             </Typography>
             <Typography variant="body1">
               This is your case management dashboard. Here you can manage your legal cases and client information.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Paper, 
@@ -10,11 +10,12 @@ import {
   Box, 
   Alert,
   Link,
-  Grid
+  CircularProgress
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import { createUserWithEmail } from '@/services/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Registration page component
@@ -22,6 +23,15 @@ import { createUserWithEmail } from '@/services/firebase';
  */
 export default function Register() {
   const router = useRouter();
+  const { currentUser, isLoading, authInitialized } = useAuth();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authInitialized && currentUser && !isLoading) {
+      console.log('User already logged in and auth initialized, redirecting to dashboard');
+      router.push('/dashboard');
+    }
+  }, [currentUser, isLoading, authInitialized, router]);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -68,11 +78,6 @@ export default function Register() {
       // Create user with Firebase Authentication
       const userCredential = await createUserWithEmail(formData.email, formData.password);
       
-      // Store user info in local storage (if needed)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('uid', userCredential.user.uid);
-      }
-      
       // Navigate to dashboard
       router.push('/dashboard');
     } catch (error: any) {
@@ -82,6 +87,17 @@ export default function Register() {
       setLoading(false);
     }
   };
+  
+  // Show loading indicator while checking auth state
+  if (isLoading) {
+    return (
+      <Container maxWidth="sm">
+        <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
   
   return (
     <Container maxWidth="sm">
