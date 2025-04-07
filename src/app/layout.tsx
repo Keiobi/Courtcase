@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Metadata } from 'next';
+import { Providers } from '@/components/Providers';
 import ThemeRegistry from '@/components/ThemeRegistry';
 import Header from '@/components/Header';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -19,10 +20,12 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeRegistry>
-          <AuthProvider>
-            <Header />
-            {children}
-          </AuthProvider>
+          <Providers>
+            <AuthProvider>
+              <Header />
+              {children}
+            </AuthProvider>
+          </Providers>
         </ThemeRegistry>
       </body>
     </html>
